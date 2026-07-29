@@ -1,0 +1,2078 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VERZÁTIL — ATÓYATL</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&family=Bebas+Neue&family=Special+Elite&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   TOKENS & RESET
+═══════════════════════════════════════════ */
+:root {
+  --deep:    #0e4f6e;
+  --mid:     #1a7fa0;
+  --light:   #5bb8d4;
+  --pale:    #b8e4f0;
+  --foam:    #e8f6fb;
+  --shore:   #f4f9fc;
+  --sand:    #faf7f3;
+  --ink:     #0d2733;
+  --ink-s:   #2c5066;
+  --body:    #3a5a6e;
+  --muted:   #7aa3b5;
+  --white:   #ffffff;
+  --nav-h:   64px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--shore); color: var(--ink); overflow-x: hidden; }
+
+/* ═══════════════════════════════════════════
+   WATER BG CANVAS
+═══════════════════════════════════════════ */
+#water-bg {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 0; pointer-events: none; opacity: 0.18;
+}
+
+/* ═══════════════════════════════════════════
+   NAV GLOBAL
+═══════════════════════════════════════════ */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  height: var(--nav-h);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 3rem;
+  background: rgba(244,249,252,0.92);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(91,184,212,0.15);
+  transition: box-shadow 0.4s;
+}
+.nav-logo {
+  font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 600;
+  letter-spacing: 0.14em; color: var(--deep); text-decoration: none;
+}
+.nav-logo span { color: var(--light); font-style: italic; }
+.nav-links { display: flex; gap: 0; list-style: none; }
+.nav-links a {
+  display: block; padding: 0.4rem 1rem; font-size: 0.75rem; font-weight: 500;
+  letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-s);
+  text-decoration: none; transition: color 0.3s; border-radius: 6px;
+}
+.nav-links a:hover, .nav-links a.active { color: var(--mid); background: var(--foam); }
+.nav-back {
+  font-size: 0.72rem; color: var(--muted); display: flex; align-items: center;
+  gap: 0.4rem; text-decoration: none; transition: color 0.3s;
+}
+.nav-back:hover { color: var(--mid); }
+@media (max-width: 768px) {
+  nav { padding: 0 1.2rem; }
+  .nav-links { display: none; }
+}
+
+/* ═══════════════════════════════════════════
+   PAGE SYSTEM (SPA-style routing)
+═══════════════════════════════════════════ */
+.page { display: none; min-height: 100vh; }
+.page.visible { display: block; }
+
+/* ═══════════════════════════════════════════
+   PAGE HERO (inner pages)
+═══════════════════════════════════════════ */
+.page-hero {
+  position: relative; z-index: 1;
+  padding: calc(var(--nav-h) + 5rem) 3rem 5rem;
+  max-width: 1100px; margin: 0 auto;
+  overflow: hidden;
+}
+.page-hero-eyebrow {
+  font-size: 0.68rem; font-weight: 500; letter-spacing: 0.25em; text-transform: uppercase;
+  color: var(--light); margin-bottom: 1rem;
+  display: flex; align-items: center; gap: 0.7rem;
+  opacity: 0; animation: fade-up 0.8s 0.1s ease forwards;
+}
+.page-hero-eyebrow::before {
+  content: ''; display: block; width: 20px; height: 1px; background: var(--light);
+}
+.page-hero-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(3.5rem, 9vw, 7.5rem);
+  font-weight: 300; line-height: 0.95; letter-spacing: -0.02em;
+  color: var(--deep); margin-bottom: 1.8rem;
+  opacity: 0; animation: fade-up 0.8s 0.2s ease forwards;
+}
+.page-hero-title em { font-style: italic; color: var(--mid); }
+.page-hero-body {
+  font-size: 1rem; line-height: 1.8; color: var(--body); max-width: 560px;
+  opacity: 0; animation: fade-up 0.8s 0.35s ease forwards;
+}
+/* Large watermark letter */
+.page-watermark {
+  position: absolute; right: -1rem; top: 50%; transform: translateY(-50%);
+  font-family: 'Cormorant Garamond', serif; font-size: 22vw; font-weight: 300;
+  color: var(--pale); opacity: 0.35; pointer-events: none; user-select: none;
+  line-height: 1; letter-spacing: -0.05em;
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════
+   WAVE DIVIDER
+═══════════════════════════════════════════ */
+.wave { width: 100%; overflow: hidden; line-height: 0; position: relative; z-index: 1; }
+.wave svg { display: block; width: 100%; }
+
+/* ═══════════════════════════════════════════
+   SECTION INNER
+═══════════════════════════════════════════ */
+.sec { position: relative; z-index: 1; }
+.sec-inner { max-width: 1100px; margin: 0 auto; padding: 4.5rem 3rem; }
+.sec-label {
+  font-size: 0.66rem; font-weight: 500; letter-spacing: 0.25em; text-transform: uppercase;
+  color: var(--light); margin-bottom: 0.8rem;
+  display: flex; align-items: center; gap: 0.7rem;
+}
+.sec-label::before { content: ''; width: 20px; height: 1px; background: var(--light); }
+.sec-title {
+  font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: 300; color: var(--deep); line-height: 1.1; margin-bottom: 1.2rem;
+}
+.sec-title em { font-style: italic; color: var(--mid); }
+.sec-body { font-size: 0.93rem; line-height: 1.8; color: var(--body); max-width: 600px; }
+
+/* ═══════════════════════════════════════════
+   CARDS
+═══════════════════════════════════════════ */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 1.4rem; }
+.card {
+  background: var(--white); border: 1px solid rgba(91,184,212,0.14);
+  border-radius: 16px; padding: 1.8rem; text-decoration: none; color: inherit;
+  transition: transform 0.4s cubic-bezier(.4,0,.2,1), box-shadow 0.4s, border-color 0.3s;
+  position: relative; overflow: hidden;
+}
+.card::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--mid), var(--light));
+  transform: scaleX(0); transform-origin: left; transition: transform 0.4s ease;
+}
+.card:hover { transform: translateY(-5px); box-shadow: 0 14px 40px rgba(14,79,110,0.11); border-color: var(--pale); }
+.card:hover::after { transform: scaleX(1); }
+.card-tag { font-size: 0.63rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--light); margin-bottom: 0.7rem; }
+.card-title { font-family: 'Cormorant Garamond', serif; font-size: 1.35rem; font-weight: 400; color: var(--deep); line-height: 1.2; margin-bottom: 0.5rem; }
+.card-desc { font-size: 0.81rem; line-height: 1.65; color: var(--body); }
+.card-arrow { margin-top: 1.1rem; font-size: 0.73rem; color: var(--light); display: flex; align-items: center; gap: 0.4rem; transition: gap 0.3s, color 0.3s; }
+.card:hover .card-arrow { gap: 0.75rem; color: var(--mid); }
+
+/* ═══════════════════════════════════════════
+   EPISODE LIST
+═══════════════════════════════════════════ */
+.ep-list { border-radius: 16px; overflow: hidden; border: 1px solid var(--pale); }
+.ep-item {
+  display: flex; align-items: center; gap: 0; padding: 1.1rem 1.5rem;
+  background: var(--white); text-decoration: none; color: inherit;
+  border-bottom: 1px solid var(--foam); transition: background 0.25s, padding-left 0.3s;
+}
+.ep-item:last-child { border-bottom: none; }
+.ep-item:hover { background: var(--foam); padding-left: 2rem; }
+.ep-num {
+  font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 300;
+  color: var(--pale); width: 3rem; flex-shrink: 0; line-height: 1;
+}
+.ep-title { flex: 1; font-size: 0.88rem; font-weight: 400; color: var(--ink); padding: 0 1rem; }
+.ep-badge {
+  font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--muted); background: var(--foam); padding: 0.25rem 0.6rem;
+  border-radius: 100px; flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════
+   SEASON TOGGLE
+═══════════════════════════════════════════ */
+.season-toggle { display: flex; gap: 0.6rem; margin-bottom: 2rem; }
+.season-btn {
+  padding: 0.55rem 1.3rem; background: var(--white); border: 1px solid var(--pale);
+  border-radius: 100px; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--muted); cursor: pointer;
+  transition: all 0.3s ease;
+}
+.season-btn.active { background: var(--deep); color: var(--white); border-color: var(--deep); }
+
+/* ═══════════════════════════════════════════
+   DARK STRIP (for ATO-05 / EVA highlight)
+═══════════════════════════════════════════ */
+.dark-strip {
+  background: linear-gradient(135deg, var(--deep) 0%, var(--mid) 100%);
+  color: var(--white); position: relative; overflow: hidden;
+}
+.dark-strip::before {
+  content: attr(data-watermark); position: absolute; right: -2rem; top: 50%;
+  transform: translateY(-50%) rotate(-90deg);
+  font-family: 'Cormorant Garamond', serif; font-size: 14rem; font-weight: 300;
+  opacity: 0.06; letter-spacing: 0.1em; pointer-events: none; white-space: nowrap;
+}
+.dark-strip .sec-label { color: rgba(255,255,255,0.5); }
+.dark-strip .sec-label::before { background: rgba(255,255,255,0.35); }
+.dark-strip .sec-title { color: var(--white); }
+.dark-strip .sec-body { color: rgba(255,255,255,0.78); max-width: 100%; }
+
+/* highlight chips */
+.chip-grid { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 1.5rem; }
+.chip {
+  padding: 0.65rem 1.2rem; border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 10px; font-size: 0.83rem; color: rgba(255,255,255,0.85);
+  background: rgba(255,255,255,0.07); line-height: 1.4;
+}
+
+/* ═══════════════════════════════════════════
+   MODULE STEPS (micro cursos)
+═══════════════════════════════════════════ */
+.module-flow { display: flex; flex-direction: column; gap: 0; position: relative; }
+.module-flow::before {
+  content: ''; position: absolute; left: 1.7rem; top: 0; bottom: 0; width: 1px;
+  background: linear-gradient(to bottom, var(--pale), transparent);
+}
+.module-step {
+  display: grid; grid-template-columns: 3.5rem 1fr; gap: 1.5rem;
+  align-items: start; padding: 1.5rem 0; text-decoration: none; color: inherit;
+  transition: transform 0.3s;
+}
+.module-step:hover { transform: translateX(6px); }
+.step-num {
+  width: 3.5rem; height: 3.5rem; background: var(--white); border: 1px solid var(--pale);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 300;
+  color: var(--mid); flex-shrink: 0; position: relative; z-index: 1;
+  transition: background 0.3s, border-color 0.3s;
+}
+.module-step:hover .step-num { background: var(--deep); color: var(--white); border-color: var(--deep); }
+.step-content { padding-top: 0.6rem; }
+.step-title { font-size: 0.92rem; font-weight: 500; color: var(--ink); margin-bottom: 0.3rem; }
+.step-desc { font-size: 0.8rem; color: var(--body); line-height: 1.6; }
+
+/* ═══════════════════════════════════════════
+   CTA BLOCK
+═══════════════════════════════════════════ */
+.cta-block {
+  background: var(--white); border: 1px solid rgba(91,184,212,0.15);
+  border-radius: 20px; padding: 2.5rem; display: flex;
+  align-items: center; justify-content: space-between; gap: 2rem;
+  flex-wrap: wrap;
+}
+.cta-block .sec-title { font-size: 1.6rem; margin-bottom: 0.5rem; }
+.btn {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.8rem 1.8rem; border-radius: 100px; font-size: 0.78rem;
+  font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase;
+  text-decoration: none; transition: all 0.3s ease; white-space: nowrap;
+}
+.btn-dark { background: var(--deep); color: var(--white); }
+.btn-dark:hover { background: var(--mid); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(14,79,110,0.22); }
+.btn-outline { background: transparent; color: var(--deep); border: 1px solid var(--pale); }
+.btn-outline:hover { background: var(--foam); border-color: var(--light); transform: translateY(-2px); }
+
+/* ═══════════════════════════════════════════
+   TWO-COL LAYOUT
+═══════════════════════════════════════════ */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start; }
+@media (max-width: 768px) { .two-col { grid-template-columns: 1fr; gap: 2rem; } }
+
+/* ═══════════════════════════════════════════
+   VERZÁTIL PRESENTATION BLOCK
+═══════════════════════════════════════════ */
+.present-block {
+  background: var(--white); border: 1px solid rgba(91,184,212,0.14);
+  border-radius: 20px; padding: 2.5rem; margin-bottom: 2rem;
+}
+.present-block p { font-size: 0.93rem; line-height: 1.8; color: var(--body); }
+
+/* UAM RADIO badge */
+.uam-badge {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.5rem 1rem; background: var(--deep); color: var(--white);
+  border-radius: 8px; font-size: 0.72rem; font-weight: 500; letter-spacing: 0.1em;
+  text-transform: uppercase; margin-bottom: 1rem;
+}
+.uam-badge::before {
+  content: ''; width: 8px; height: 8px; border-radius: 50%;
+  background: #ff4040; animation: pulse-red 1.5s ease-in-out infinite;
+}
+@keyframes pulse-red {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.4); }
+}
+
+/* ═══════════════════════════════════════════
+   SCROLL REVEAL
+═══════════════════════════════════════════ */
+.rv { opacity: 0; transform: translateY(28px); transition: opacity 0.65s ease, transform 0.65s ease; }
+.rv.in { opacity: 1; transform: none; }
+.rv-d1 { transition-delay: 0.1s; } .rv-d2 { transition-delay: 0.2s; } .rv-d3 { transition-delay: 0.3s; }
+
+/* ═══════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════ */
+.foot {
+  position: relative; z-index: 1;
+  background: var(--deep); color: rgba(255,255,255,0.55);
+  padding: 2.5rem 3rem;
+  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;
+}
+.foot-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 300; letter-spacing: 0.18em; color: rgba(255,255,255,0.85); }
+.foot-links { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+.foot-links a { color: rgba(255,255,255,0.45); text-decoration: none; font-size: 0.73rem; letter-spacing: 0.06em; transition: color 0.3s; }
+.foot-links a:hover { color: var(--pale); }
+.foot-copy { font-size: 0.68rem; opacity: 0.4; width: 100%; text-align: center; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.08); margin-top: 0.5rem; }
+
+/* ═══════════════════════════════════════════
+   PAGE LANDING (button grid to navigate)
+═══════════════════════════════════════════ */
+#landing {
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: calc(var(--nav-h) + 3rem) 2rem 4rem;
+  position: relative; z-index: 1; text-align: center;
+}
+.landing-title {
+  font-family: 'Cormorant Garamond', serif; font-size: clamp(2.5rem, 7vw, 5rem);
+  font-weight: 300; color: var(--deep); margin-bottom: 0.5rem;
+}
+.landing-title em { font-style: italic; color: var(--mid); }
+.landing-sub { font-size: 0.85rem; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 3.5rem; }
+.landing-grid { display: grid; grid-template-columns: repeat(2, 260px); gap: 1rem; }
+.landing-btn {
+  padding: 2rem 1.5rem; background: var(--white); border: 1px solid rgba(91,184,212,0.18);
+  border-radius: 18px; cursor: pointer; text-align: left; transition: all 0.35s ease;
+  position: relative; overflow: hidden;
+}
+.landing-btn::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--mid), var(--light));
+  transform: scaleX(0); transform-origin: left; transition: transform 0.35s;
+}
+.landing-btn:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(14,79,110,0.12); border-color: var(--pale); }
+.landing-btn:hover::after { transform: scaleX(1); }
+.lb-tag { font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--light); margin-bottom: 0.6rem; }
+.lb-name { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 300; color: var(--deep); line-height: 1.1; margin-bottom: 0.4rem; }
+.lb-desc { font-size: 0.77rem; color: var(--body); line-height: 1.5; }
+@media (max-width: 600px) { .landing-grid { grid-template-columns: 1fr; } }
+
+/* ═══════════════════════════════════════════
+   ROCOLA (estilo vinyl / biblioteca de pistas)
+═══════════════════════════════════════════ */
+.rocola-wrap { max-width: 820px; margin: 0 auto; }
+.vinylbox {
+  background: var(--white);
+  border: 1px solid var(--pale);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(14,79,110,0.12);
+  overflow: hidden;
+}
+.vb-top {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: 1.3rem 1.6rem;
+  background: linear-gradient(135deg, var(--deep) 0%, var(--mid) 100%);
+}
+.vb-logo {
+  font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; font-weight: 600;
+  letter-spacing: 0.08em; color: var(--white); display: flex; align-items: center; gap: 0.5rem;
+}
+.vb-logo-dot { width: 7px; height: 7px; border-radius: 50%; background: #4af3ff; box-shadow: 0 0 8px #4af3ff; }
+.vb-search {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 100px; padding: 0.4rem 0.9rem; width: 190px;
+}
+.vb-search svg { width: 12px; height: 12px; flex-shrink: 0; stroke: rgba(255,255,255,0.7); }
+.vb-search input {
+  background: none; border: none; outline: none; color: var(--white);
+  font-family: 'DM Sans', sans-serif; font-size: 0.78rem; width: 100%;
+}
+.vb-search input::placeholder { color: rgba(255,255,255,0.6); }
+
+.vb-thead {
+  display: grid; grid-template-columns: 34px 44px 1fr 100px;
+  align-items: center; gap: 0.8rem;
+  padding: 0.6rem 1.6rem; border-bottom: 1px solid var(--foam);
+}
+.vb-th { font-size: 0.6rem; font-weight: 500; letter-spacing: 0.13em; text-transform: uppercase; color: var(--muted); }
+.vb-th-r { text-align: right; }
+
+.vb-seasons { display: flex; gap: 0.5rem; padding: 0.9rem 1.6rem 0.2rem; }
+.vb-season-btn {
+  padding: 0.4rem 1rem; background: var(--shore); border: 1px solid var(--pale);
+  border-radius: 100px; font-size: 0.7rem; font-weight: 500; letter-spacing: 0.05em;
+  text-transform: uppercase; color: var(--ink-s); cursor: pointer; transition: all 0.25s ease;
+}
+.vb-season-btn:hover { border-color: var(--light); }
+.vb-season-btn.active { background: var(--deep); color: var(--white); border-color: var(--deep); }
+
+.vb-list { max-height: 360px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--pale) transparent; }
+.vb-list::-webkit-scrollbar { width: 4px; }
+.vb-list::-webkit-scrollbar-thumb { background: var(--pale); border-radius: 2px; }
+
+.vb-row {
+  display: grid; grid-template-columns: 34px 44px 1fr 100px;
+  align-items: center; gap: 0.8rem;
+  padding: 0.55rem 1.6rem; cursor: pointer;
+  transition: background 0.15s; position: relative;
+}
+.vb-row::after {
+  content: ''; position: absolute; left: 1.6rem; right: 1.6rem; bottom: 0; height: 1px;
+  background: var(--foam);
+}
+.vb-row:last-child::after { display: none; }
+.vb-row:hover { background: var(--foam); }
+.vb-row.active { background: rgba(91,184,212,0.09); }
+
+.vb-num { font-size: 0.76rem; color: var(--muted); text-align: right; position: relative; font-variant-numeric: tabular-nums; }
+.vb-num .n { transition: opacity 0.1s; }
+.vb-num .p { position: absolute; inset: 0; display: flex; align-items: center; justify-content: flex-end; opacity: 0; color: var(--mid); transition: opacity 0.1s; }
+.vb-row:hover .vb-num .n, .vb-row.active .vb-num .n { opacity: 0; }
+.vb-row:hover .vb-num .p, .vb-row.active .vb-num .p { opacity: 1; }
+
+.vb-disc {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: radial-gradient(circle, var(--pale) 0%, var(--foam) 14%, var(--pale) 16%, var(--light) 32%, var(--pale) 34%, var(--light) 50%, var(--pale) 52%, var(--light) 68%, var(--pale) 70%, var(--foam) 100%);
+  position: relative; flex-shrink: 0; box-shadow: 0 2px 8px rgba(14,79,110,0.18);
+}
+.vb-row.active .vb-disc { animation: vbspin 2.5s linear infinite; }
+@keyframes vbspin { to { transform: rotate(360deg); } }
+.vb-disc-label { position: absolute; inset: 30%; border-radius: 50%; box-shadow: 0 0 0 1px rgba(255,255,255,0.5); }
+.vb-disc-hole { position: absolute; inset: 46%; border-radius: 50%; background: var(--shore); }
+
+.vb-info { min-width: 0; }
+.vb-title { font-size: 0.86rem; font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; }
+.vb-row.active .vb-title { color: var(--mid); }
+.vb-sub { font-size: 0.72rem; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vb-id { font-size: 0.74rem; color: var(--light); text-align: right; white-space: nowrap; }
+
+.vb-player {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: 1rem 1.6rem;
+  background: linear-gradient(180deg, var(--shore), var(--white));
+  border-top: 1px solid var(--pale); flex-wrap: wrap;
+}
+.vb-now { display: flex; align-items: center; gap: 0.8rem; min-width: 0; flex: 1; }
+.vb-now-disc {
+  width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
+  background: radial-gradient(circle, var(--pale) 0%, var(--foam) 14%, var(--pale) 16%, var(--light) 32%, var(--pale) 34%, var(--light) 50%, var(--pale) 52%, var(--light) 68%, var(--pale) 70%, var(--foam) 100%);
+  position: relative; box-shadow: 0 2px 10px rgba(14,79,110,0.18);
+}
+.vb-now-disc.spin { animation: vbspin 2.5s linear infinite; }
+.vb-now-label { position: absolute; inset: 30%; border-radius: 50%; box-shadow: 0 0 0 1px rgba(255,255,255,0.5); background: var(--deep); }
+.vb-now-hole { position: absolute; inset: 46%; border-radius: 50%; background: var(--shore); }
+.vb-now-text { min-width: 0; }
+.vb-now-title { font-size: 0.85rem; font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vb-now-sub { font-size: 0.72rem; color: var(--muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.vb-controls { display: flex; align-items: center; gap: 0.6rem; }
+.vb-btn {
+  width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--pale); background: var(--white);
+  cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; justify-content: center;
+  color: var(--ink-s); transition: all 0.15s;
+}
+.vb-btn:hover { background: var(--foam); border-color: var(--light); }
+.vb-btn.play { width: 42px; height: 42px; background: var(--deep); color: var(--white); border-color: var(--deep); font-size: 0.95rem; }
+.vb-btn.play:hover { background: var(--mid); }
+
+@media (max-width: 768px) {
+  .vb-th:nth-child(4), .vb-id { display: none; }
+  .vb-thead, .vb-row { grid-template-columns: 34px 44px 1fr; }
+  .vb-search { width: 140px; }
+}
+
+
+/* ═══ REPRODUCTOR (tal cual, vista a pantalla completa) ═══ */
+:root {
+  --water-deep:  #0e4f6e;
+  --water-mid:   #1a7fa0;
+  --water-light: #5bb8d4;
+  --water-pale:  #b8e4f0;
+  --water-foam:  #e8f6fb;
+  --shore:       #f4f9fc;
+  --ink:         #0d2733;
+  --ink-soft:    #2c5066;
+  --text-body:   #3a5a6e;
+  --text-muted:  #7aa3b5;
+  --white:       #ffffff;
+  --border:      rgba(91,184,212,0.18);
+  --serif:       "Cormorant Garamond", serif;
+  --sans:        "DM Sans", sans-serif;
+}
+#reproductor-view {
+  background:var(--shore);
+  color:var(--ink);
+  font-family:var(--sans);
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  /* Espacio para la barra de controles fija */
+  padding-bottom:90px;
+ position:fixed; inset:0; z-index:500; display:none; }
+#reproductor-view.visible { display:flex; }
+#reproductor-view #repro-water-bg {position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0.18;}
+/* ── MAIN LAYOUT ── */
+#reproductor-view .player-shell {
+  position:relative;
+  z-index:1;
+  width:100vw;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:0;
+}
+/* ── AMBIENT ── */
+#reproductor-view .ambient {
+  position:fixed;
+  width:60vw;height:60vw;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(91,184,212,0.18) 0%,transparent 70%);
+  filter:blur(80px);
+  pointer-events:none;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  z-index:0;
+  transition:background 1.4s ease;
+}
+/* ── SCENE — album cover + vinyl side by side ── */
+#reproductor-view .scene {
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:0;
+  width:85vw;
+  height:auto;
+  max-height:calc(100vh - 140px);
+  margin:0 auto;
+  flex-shrink:0;
+}
+/* ─── ALBUM COVER SIDE ─── */
+#reproductor-view .album-side {
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  width:45.5%;
+  height:100%;
+  position:relative;
+  z-index:2;
+  overflow:visible;
+}
+#reproductor-view .album-cover-wrap {
+  position:relative;
+  /* transform-style:preserve-3d y perspective eliminados: forzaban rasterización a 1x degradando la imagen */
+  transform:rotate(-4deg);
+  transition:transform 0.6s cubic-bezier(0.34,1.2,0.64,1);
+  cursor:pointer;
+}
+#reproductor-view .album-cover-wrap:hover {
+  transform:rotate(-2deg) scale(1.03);
+}
+#reproductor-view .album-cover {
+  /* ════════════════════════════════════════════════
+     TAMAÑO DE LA PORTADA DEL ÁLBUM
+     Formato: clamp(MIN, PREFERIDO, MAX)
+  ════════════════════════════════════════════════ */
+  width:clamp(260px,55vh,500px);
+  height:clamp(260px,55vh,500px);
+  border-radius:10px;
+  background:var(--cover-bg,var(--water-deep));
+  box-shadow:
+    -16px 16px 50px rgba(14,79,110,0.45),
+    6px -4px 20px rgba(255,255,255,0.08),
+    inset 0 0 0 1px rgba(255,255,255,0.1);
+  overflow:hidden;
+  position:relative;
+  border:1px solid var(--border);
+  transition:background 0.6s, box-shadow 0.5s;
+}
+/* Art image — always visible */
+#reproductor-view .cover-art {
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  image-rendering: -webkit-optimize-contrast; /* Safari */
+  image-rendering: crisp-edges;               /* Firefox */
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+/* Spine on left edge */
+#reproductor-view .album-cover-wrap::before {
+  content:"";position:absolute;
+  left:-10px;top:6px;bottom:6px;width:11px;
+  background:linear-gradient(90deg,rgba(14,79,110,0.7),rgba(26,127,160,0.5));
+  border-radius:2px 0 0 2px;z-index:1;
+}
+/* Shadow cast onto vinyl */
+#reproductor-view .album-cover-wrap::after {
+  content:"";
+  position:absolute;
+  right:-20px;top:10%;bottom:10%;width:20px;
+  background:linear-gradient(90deg,rgba(255, 255, 255, 0.15),transparent);
+  pointer-events:none;
+}
+/* ─── VINYL SIDE ─── */
+#reproductor-view .vinyl-side {
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  width:42.5%;
+  height:100%;
+  position:relative;
+  z-index:3;
+}
+#reproductor-view .disc-wrap {
+  position:relative;
+  /* ════════════════════════════════════════════════
+     40  10   80
+  ════════════════════════════════════════════════ */
+  width:clamp(260px,62vh,500px);
+  height:clamp(260px,62vh,500px);
+  flex-shrink:0;
+  /* Overlap the album cover slightly, like peeking out */
+  margin-left:-8%;
+}
+#reproductor-view .disc {
+  width:100%;height:100%;
+  border-radius:50%;
+  position:relative;
+  cursor:grab;
+  backdrop-filter:blur(1px);
+  -webkit-backdrop-filter:blur(1px);
+  transition:box-shadow 0.5s;
+  user-select:none;
+}
+#reproductor-view .disc:active {cursor:grabbing;}
+#reproductor-view .disc.spinning {
+  /* ════════════════════════════════════════════════
+    VELOCIDAD DE GIRO DEL DISCO 
+  ════════════════════════════════════════════════ */
+  animation:fullSpin 0.8s linear infinite;
+}
+@keyframes fullSpin {to {transform:rotate(360deg);}}
+#reproductor-view .disc svg {
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  display:block;
+  pointer-events:none;}
+#reproductor-view .disc-label {
+  position:absolute;
+  inset:28%;
+  border-radius:50%;
+  overflow:hidden;
+  background-color:#1a1a2e;
+  background-size:cover;
+  background-position:center;
+  box-shadow:0 0 0 2px rgba(255,255,255,0.18), 0 0 0 3px rgba(255,255,255,0.06);
+  pointer-events:none;
+}
+/* Textos ocultos — centro sin letras */
+#reproductor-view .dl-title { display:none; }
+#reproductor-view .dl-artist { display:none; }
+#reproductor-view .disc-hole {
+  position:absolute;
+  inset:47%;
+  border-radius:50%;
+  /* Agujero semi-transparente para mantener efecto cristal */
+  background:rgba(255,255,255,0.55);
+  backdrop-filter:blur(4px);
+  box-shadow:0 0 0 1.5px rgba(255,255,255,0.4);
+  pointer-events:none;}
+/* Tonearm */
+#reproductor-view .arm-wrap {
+  position:absolute;
+  top:40px;right:-88px;
+  width:210px;height:225px;
+  transform-origin:80% 12%;
+  transform:rotate(-30deg);
+  transition:transform 0.9s cubic-bezier(0.34,1.1,0.64,1);
+  pointer-events:none;
+  z-index:6;
+}
+#reproductor-view .arm-wrap.down {transform:rotate(-7deg);}
+/* Scratch hint */
+#reproductor-view .scratch-hint {
+  position:absolute;
+  bottom:-28px;left:50%;
+  transform:translateX(-50%);
+  font-size:0.62rem;
+  color:var(--text-muted);
+  letter-spacing:0.08em;
+  opacity:0;
+  transition:opacity 0.4s;
+  white-space:nowrap;
+  pointer-events:none;
+}
+#reproductor-view .disc-wrap:hover .scratch-hint {opacity:1;}
+/* ── PROGRESS ── */
+#reproductor-view .progress-area {
+  width:100%;
+  margin:0;
+  z-index:1;
+  flex-shrink:0;
+  padding:0 2rem;
+}
+#reproductor-view .time-row {display:flex;justify-content:space-between;font-size:0.66rem;color:var(--text-muted);font-variant-numeric:tabular-nums;margin-bottom:0.35rem;}
+#reproductor-view .pbar {width:100%;height:3px;background:var(--water-pale);border-radius:2px;cursor:pointer;position:relative;transition:height 0.15s;}
+#reproductor-view .pbar:hover {height:5px;}
+#reproductor-view .pfill {height:100%;background:linear-gradient(90deg,var(--water-mid),var(--water-light));border-radius:2px;width:0%;transition:width 0.25s linear;position:relative;}
+#reproductor-view .pbar:hover .pfill::after {content:"";position:absolute;right:-5px;top:50%;transform:translateY(-50%);width:10px;height:10px;border-radius:50%;background:var(--water-mid);box-shadow:0 0 6px rgba(91,184,212,0.5);}
+/* ── CONTROLS ROW ── */
+/* ── BARRA DE CONTROLES FIJA EN LA PARTE INFERIOR ── */
+#reproductor-view .controls-bar {
+  position:fixed;
+  bottom:0; left:0; right:0;
+  z-index:100;
+  background:rgba(244,249,252,0.96);
+  backdrop-filter:blur(18px);
+  border-top:1px solid var(--border);
+  box-shadow:0 -4px 24px rgba(14,79,110,0.08);
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  padding:0.6rem 2rem 0.7rem;
+  gap:0.45rem;
+}
+#reproductor-view .controls-row {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:1rem;
+  z-index:1;
+  flex-shrink:0;
+}
+/* Columna izquierda: info de canción actual */
+#reproductor-view .ctrl-track-info {
+  display:flex; align-items:center; gap:0.75rem;
+  min-width:200px; flex:1;
+}
+#reproductor-view .ctrl-track-mini {
+  display:flex; flex-direction:column;
+}
+#reproductor-view .ctrl-title { font-size:0.82rem; font-weight:500; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px;}
+#reproductor-view .ctrl-artist { font-size:0.7rem; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px;}
+/* Columna central: botones */
+#reproductor-view .ctrl-center {
+  display:flex; align-items:center; justify-content:center; gap:0.9rem; flex:1;
+}
+/* Columna derecha: volumen + lista */
+#reproductor-view .ctrl-right {
+  display:flex; align-items:center; gap:0.8rem; justify-content:flex-end; flex:1;
+}
+#reproductor-view .btn {background:none;border:none;cursor:pointer;color:var(--text-muted);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:color 0.2s,background 0.2s;}
+#reproductor-view .btn-sm {width:34px;height:34px;font-size:0.88rem;}
+#reproductor-view .btn-sm:hover {color:var(--water-deep);background:var(--water-foam);}
+#reproductor-view .btn-play {width:54px;height:54px;font-size:1.1rem;background:var(--water-deep);color:var(--white);box-shadow:0 4px 16px rgba(14,79,110,0.3);transition:all 0.2s;}
+#reproductor-view .btn-play:hover {background:var(--water-mid);box-shadow:0 6px 20px rgba(26,127,160,0.4);transform:translateY(-1px);}
+#reproductor-view .btn.hi {color:var(--water-mid);}
+#reproductor-view .vol-row {display:flex;align-items:center;gap:0.6rem;}
+#reproductor-view .vol-ic {font-size:0.75rem;color:var(--text-muted);}
+#reproductor-view .vol {-webkit-appearance:none;
+  appearance: none;
+  width:90px;height:3px;background:var(--water-pale);border-radius:2px;outline:none;cursor:pointer;}
+#reproductor-view .vol::-webkit-slider-thumb {-webkit-appearance:none;width:11px;height:11px;border-radius:50%;background:var(--water-mid);cursor:pointer;}
+/* ── QUEUE (2 songs only) ── */
+#reproductor-view .queue-list {display:flex;flex-direction:column;gap:2px;}
+/* ── MODAL DE LISTA DE CANCIONES ── */
+#reproductor-view .playlist-modal {
+  display:none;
+  position:fixed;
+  bottom:90px; left:50%; transform:translateX(-50%);
+  z-index:200;
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:16px;
+  box-shadow:0 8px 40px rgba(14,79,110,0.18);
+  width:clamp(300px,50vw,520px);
+  max-height:55vh;
+  overflow:hidden;
+  display:none;
+  flex-direction:column;
+}
+#reproductor-view .playlist-modal.open { display:flex; }
+#reproductor-view .pm-head {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0.8rem 1.2rem;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+#reproductor-view .pm-label { font-size:0.65rem; font-weight:500; letter-spacing:0.16em; text-transform:uppercase; color:var(--text-muted); }
+#reproductor-view .pm-close { background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:1rem; line-height:1; padding:0.2rem 0.4rem; border-radius:50%; transition:background 0.2s; }
+#reproductor-view .pm-close:hover { background:var(--water-foam); color:var(--water-deep); }
+#reproductor-view .pm-body { overflow-y:auto; padding:0.5rem 0.6rem; }
+#reproductor-view .pm-body::-webkit-scrollbar { width:4px; }
+#reproductor-view .pm-body::-webkit-scrollbar-thumb { background:var(--water-pale); border-radius:2px; }
+/* Botón de lista */
+#reproductor-view .btn-list {
+  display:flex; align-items:center; gap:0.4rem;
+  background:none; border:1px solid var(--border);
+  border-radius:100px; padding:0.3rem 0.8rem;
+  font-size:0.72rem; font-weight:500; letter-spacing:0.06em;
+  color:var(--text-body); cursor:pointer;
+  transition:all 0.2s; white-space:nowrap;
+}
+#reproductor-view .btn-list:hover { color:var(--water-mid); border-color:var(--water-light); background:var(--water-foam); }
+#reproductor-view .btn-list.open { color:var(--water-mid); border-color:var(--water-light); background:var(--water-foam); }
+#reproductor-view .ml-row {
+  display:grid;
+  grid-template-columns:24px 1fr 40px;
+  align-items:center;gap:0.5rem;
+  padding:0.3rem 0.4rem;
+  border-radius:7px;
+  cursor:pointer;
+  transition:background 0.15s;
+}
+#reproductor-view .ml-row:hover {background:var(--water-foam);}
+#reproductor-view .ml-row.active {background:rgba(91,184,212,0.1);}
+#reproductor-view .ml-n {font-size:0.72rem;color:var(--text-muted);text-align:right;font-variant-numeric:tabular-nums;}
+#reproductor-view .ml-row.active .ml-n {color:var(--water-mid);}
+#reproductor-view .ml-info {min-width:0;}
+#reproductor-view .ml-title {font-size:0.78rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink);}
+#reproductor-view .ml-row.active .ml-title {color:var(--water-mid);}
+#reproductor-view .ml-sub {font-size:0.63rem;color:var(--text-muted);}
+#reproductor-view .ml-dur {font-size:0.72rem;color:var(--text-muted);text-align:right;font-variant-numeric:tabular-nums;}
+/* ── TURNTABLE SCRATCH FEEDBACK ── */
+#reproductor-view .scratch-flash {
+  position:fixed;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  font-family:var(--serif);
+  font-size:1.8rem;
+  color:var(--water-mid);
+  opacity:0;
+  pointer-events:none;
+  z-index:100;
+  transition:opacity 0.3s;
+}
+/* ── ALBUM ABIERTO — overlay centrado ── */
+#reproductor-view .album-overlay {
+  position:fixed;inset:0;z-index:50;
+  background:rgba(13,39,51,0.6);
+  backdrop-filter:blur(6px);
+  opacity:0;pointer-events:none;
+  transition:opacity 0.5s ease;
+}
+#reproductor-view .album-overlay.open { opacity:1;pointer-events:all; }
+#reproductor-view .album-opened {
+  position:fixed;z-index:51;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:min(55vh, 500px);
+  height:min(55vh, 500px);
+  opacity:0;pointer-events:none;
+  transition:opacity 0.4s ease, transform 0.8s cubic-bezier(0.34,1.1,0.64,1);
+  perspective:1800px;
+  overflow:visible;
+}
+#reproductor-view .album-opened.open {
+  opacity:1;pointer-events:all;
+  /* Se desplaza a la derecha para dar espacio a la tapa abierta */
+  transform:translate(-20%,-50%);
+}
+/* Contraportada — misma medida, detrás */
+#reproductor-view .album-opened-back {
+  width:100%;height:100%;
+  border-radius:10px;overflow:hidden;
+  position:absolute;inset:0;
+  background:var(--water-deep);
+  box-shadow:4px 8px 30px rgba(14,79,110,0.25);
+}
+#reproductor-view .album-opened-back .back-img {
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;display:block;border-radius:10px;
+}
+/* Lyrics encima de la contraportada */
+#reproductor-view .album-opened-lyrics {
+  position:absolute;inset:0;border-radius:10px;
+  background:rgba(13,39,51,0.55);backdrop-filter:blur(2px);
+  display:flex;flex-direction:column;
+  padding:2rem 2.5rem;gap:0.8rem;overflow:hidden;
+}
+#reproductor-view .album-opened-lyrics-title {
+  font-family:var(--serif);font-size:clamp(1rem,2.5vh,1.5rem);
+  font-weight:600;color:rgba(255,255,255,0.9);font-style:italic;flex-shrink:0;
+}
+#reproductor-view .album-opened-lyrics-artist {
+  font-size:0.75rem;color:rgba(255,255,255,0.5);
+  letter-spacing:0.1em;text-transform:uppercase;flex-shrink:0;margin-top:-0.5rem;
+}
+#reproductor-view .album-opened-lyrics-line {
+  height:1px;flex-shrink:0;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+}
+#reproductor-view .album-opened-lyrics-body {
+  flex:1;overflow-y:auto;font-family:var(--serif);
+  font-size:clamp(0.78rem,1.5vh,0.95rem);line-height:1.9;
+  color:rgba(255,255,255,0.8);white-space:pre-line;padding-right:0.5rem;
+}
+#reproductor-view .album-opened-lyrics-body::-webkit-scrollbar {width:4px;}
+#reproductor-view .album-opened-lyrics-body::-webkit-scrollbar-thumb {background:rgba(255,255,255,0.2);border-radius:2px;}
+#reproductor-view .album-opened-lyrics-body:empty::before {
+  content:"Sin letra disponible";color:rgba(255,255,255,0.35);font-style:italic;
+}
+#reproductor-view .album-opened-close {
+  position:absolute;top:12px;right:12px;
+  width:34px;height:34px;border-radius:50%;
+  border:1px solid rgba(255,255,255,0.25);
+  background:rgba(0,0,0,0.35);color:#fff;font-size:0.9rem;
+  cursor:pointer;z-index:5;display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(4px);transition:background 0.2s, transform 0.2s;
+}
+#reproductor-view .album-opened-close:hover { background:rgba(0,0,0,0.6);transform:scale(1.1); }
+/* Portada — misma medida, encima, gira desde el lomo izquierdo */
+#reproductor-view .album-opened-cover {
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  border-radius:10px;overflow:hidden;
+  transform-origin:left center;
+  transform:rotateY(0deg);
+  transition:transform 1.1s cubic-bezier(0.34,1.05,0.64,1);
+  z-index:3;
+  box-shadow:-8px 8px 30px rgba(14,79,110,0.35);
+  background:linear-gradient(145deg, #d4c8b8, #c4b8a8 50%, #b8aa98);
+}
+#reproductor-view .album-opened-cover img {
+  width:100%;height:100%;object-fit:cover;display:block;
+  backface-visibility:hidden;
+}
+#reproductor-view .album-opened-cover .cover-color {
+  width:100%;height:100%;display:none;
+  align-items:center;justify-content:center;
+  font-family:var(--serif);color:rgba(255,255,255,0.7);
+  font-size:1.2rem;font-style:italic;
+  backface-visibility:hidden;
+}
+#reproductor-view .album-opened.flip .album-opened-cover {
+  transform:rotateY(-178deg);
+  box-shadow:none;
+}
+@media (max-height:680px) {#reproductor-view .progress-area {margin-top:0.4rem;}
+#reproductor-view .controls-row {margin-top:0.3rem;}
+#reproductor-view .queue-section {margin-top:0.3rem;}}
+@media (max-width:600px) {#reproductor-view .scene {
+    flex-direction:column;
+    height:auto;
+    width:92vw;
+    gap:1rem;
+  }
+#reproductor-view .album-side, #reproductor-view .vinyl-side {
+    width:100%;
+    justify-content:center;
+  }
+#reproductor-view .disc-wrap {margin-left:0;}
+#reproductor-view .progress-area, #reproductor-view .queue-section {width:90vw;}}
+/* ── PANEL ── */
+#reproductor-view .cp-fab {
+  position:fixed; bottom:100px; right:1.2rem; z-index:300;
+  width:42px; height:42px; border-radius:50%;
+  background:var(--water-deep,#0e4f6e); color:#fff;
+  border:none; font-size:1.1rem; cursor:pointer;
+  box-shadow:0 4px 16px rgba(14,79,110,0.35);
+  transition:transform .2s, box-shadow .2s;
+  display:flex; align-items:center; justify-content:center;
+}
+#reproductor-view .cp-fab:hover { transform:scale(1.1); box-shadow:0 6px 22px rgba(14,79,110,0.45); }
+#reproductor-view .custom-panel {
+  position:fixed; bottom:100px; right:4rem; z-index:299;
+  width:280px;
+  background:rgba(255,255,255,0.96);
+  backdrop-filter:blur(20px);
+  border:1px solid rgba(91,184,212,0.22);
+  border-radius:16px;
+  box-shadow:0 8px 40px rgba(14,79,110,0.18);
+  overflow:hidden;
+  transform:translateY(12px) scale(0.96);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .22s ease, transform .22s ease;
+}
+#reproductor-view .custom-panel.open {
+  opacity:1; transform:none; pointer-events:all;
+}
+#reproductor-view .cp-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:.75rem 1rem;
+  border-bottom:1px solid rgba(91,184,212,0.15);
+  background:rgba(14,79,110,0.04);
+}
+#reproductor-view .cp-title { font-size:.78rem; font-weight:600; color:#0e4f6e; letter-spacing:.04em; }
+#reproductor-view .cp-close {
+  background:none; border:none; cursor:pointer;
+  color:#7aa3b5; font-size:.9rem; padding:.15rem .4rem;
+  border-radius:50%; transition:background .15s;
+}
+#reproductor-view .cp-close:hover { background:rgba(14,79,110,0.08); color:#0e4f6e; }
+#reproductor-view .cp-body { padding:.9rem 1rem; display:flex; flex-direction:column; gap:.85rem; }
+#reproductor-view .cp-row { display:flex; flex-direction:column; gap:.35rem; }
+#reproductor-view .cp-label { font-size:.68rem; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:#7aa3b5; }
+#reproductor-view .cp-presets { display:flex; gap:.45rem; align-items:center; flex-wrap:wrap; }
+#reproductor-view .cp-swatch {
+  width:26px; height:26px; border-radius:50%;
+  border:2px solid transparent; cursor:pointer;
+  transition:transform .15s, border-color .15s;
+  flex-shrink:0;
+}
+#reproductor-view .cp-swatch:hover { transform:scale(1.18); }
+#reproductor-view .cp-swatch.active { border-color:rgba(91,184,212,0.8); transform:scale(1.12); }
+#reproductor-view .cp-color-pick {
+  width:26px; height:26px; border-radius:50%; border:2px solid rgba(91,184,212,0.3);
+  cursor:pointer; padding:0; overflow:hidden; background:none;
+}
+#reproductor-view .cp-color-pick::-webkit-color-swatch-wrapper { padding:0; border-radius:50%; }
+#reproductor-view .cp-color-pick::-webkit-color-swatch { border:none; border-radius:50%; }
+#reproductor-view .cp-slider-wrap { display:flex; align-items:center; gap:.7rem; }
+#reproductor-view .cp-slider { appearance: none;
+  flex:1; -webkit-appearance:none; height:4px;
+  border-radius:2px; background:rgba(91,184,212,0.25); outline:none; cursor:pointer;
+}
+#reproductor-view .cp-slider::-webkit-slider-thumb {
+  -webkit-appearance:none; width:14px; height:14px; border-radius:50%;
+  background:#0e4f6e; cursor:pointer;
+  box-shadow:0 1px 4px rgba(14,79,110,0.3);
+}
+#reproductor-view .cp-val { font-size:.72rem; color:#0e4f6e; font-weight:500; min-width:32px; text-align:right; }
+</style>
+</head>
+<body>
+
+<canvas id="water-bg"></canvas>
+
+<div id="main-view">
+
+  <div class="page-hero">
+    <div class="page-watermark">V</div>
+    <p class="page-hero-eyebrow">Podcast Cultural · DCSH UAM Lerma</p>
+    <h1 class="page-hero-title">VER<em>ZÁTIL</em></h1>
+    <p class="page-hero-body">Un podcast donde la curiosidad no tiene forma fija. Cada episodio abre una ventana distinta hacia lo que somos y lo que nos rodea, explorando desde lo íntimo hasta lo colectivo, desde lo mítico hasta lo contemporáneo.</p>
+  </div>
+
+  <div class="wave">
+    <svg viewBox="0 0 1440 60" fill="none" preserveAspectRatio="none"><path d="M0 20 Q360 55 720 20 Q1080 -15 1440 20 L1440 60 L0 60Z" fill="#ffffff"/></svg>
+  </div>
+
+  <!-- Presentación -->
+  <div class="sec" style="background:var(--white);">
+    <div class="sec-inner">
+      <div class="two-col rv">
+        <div>
+          <p class="sec-label">Presentación</p>
+          <h2 class="sec-title">Un mosaico de <em>ideas</em> y voces</h2>
+          <div class="present-block" style="margin-top:1.5rem; border-left: 2px solid var(--pale); border-radius: 0 16px 16px 0; padding-left:1.8rem; background:var(--shore);">
+            <p>En un esfuerzo por fortalecer la divulgación del conocimiento, la División de Ciencias Sociales y Humanidades, junto con el Departamento de Estudios Culturales, presentaron VERZÁTIL: un podcast cultural que abre nuevos espacios de reflexión y diálogo.</p>
+            <br>
+            <p>El alumnado y egresados de la Licenciatura en Educación y Tecnologías Digitales contribuyen con su creatividad y conocimientos para impulsar la divulgación académica y cultural.</p>
+          </div>
+        </div>
+        <div class="rv rv-d2">
+          <div class="uam-badge">UAM Radio · En vivo</div>
+          <div style="background:var(--shore); border:1px solid var(--pale); border-radius:16px; padding:1.8rem;">
+            <p class="sec-label" style="margin-bottom:0.6rem;">Presencia en radio</p>
+            <p style="font-size:0.88rem; color:var(--body); line-height:1.7;">ATÓYATL fue presentado en la cabina de UAM RADIO, donde el equipo habló sobre VERZÁTIL y exploró cómo el podcast se ha convertido en una herramienta para compartir perspectivas, análisis y temas de interés entre la comunidad estudiantil.</p>
+            <a href="javascript:void(0)" onclick="window.top.location.href='https://sites.google.com/view/atoyatl/verzátil'" class="btn btn-outline" style="margin-top:1.2rem; font-size:0.7rem;">Ver más →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wave" style="background:var(--white);">
+    <svg viewBox="0 0 1440 60" fill="none" preserveAspectRatio="none"><path d="M0 40 Q720 0 1440 40 L1440 60 L0 60Z" fill="#f4f9fc"/></svg>
+  </div>
+
+  <!-- Episodios → Rocola -->
+  <div class="sec">
+    <div class="sec-inner">
+      <p class="sec-label rv">Episodios</p>
+      <h2 class="sec-title rv rv-d1">Todas las <em>temporadas</em></h2>
+      <p class="sec-body rv rv-d2" style="margin-bottom:2.5rem;">14 episodios que navegan entre cultura, historia, música y reflexión social.</p>
+
+      <div class="rocola-wrap rv rv-d3">
+        <div class="vinylbox">
+          <div class="vb-top">
+            <div class="vb-logo"><span class="vb-logo-dot"></span>VERZÁTIL · Episodios</div>
+            <div class="vb-search">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6"/><line x1="17" y1="17" x2="21" y2="21"/></svg>
+              <input type="text" id="jk-search" placeholder="Buscar episodio…">
+            </div>
+          </div>
+
+          <div class="vb-thead">
+            <div class="vb-th vb-th-r">#</div>
+            <div class="vb-th"></div>
+            <div class="vb-th">Episodio</div>
+            <div class="vb-th vb-th-r">ID</div>
+          </div>
+
+          <div class="vb-seasons" id="jk-seasons"></div>
+
+          <div class="vb-list" id="jk-shelf"></div>
+
+          <div class="vb-player">
+            <div class="vb-now">
+              <div class="vb-now-disc" id="jk-now-disc">
+                <div class="vb-now-label" id="jk-now-label"></div>
+                <div class="vb-now-hole"></div>
+              </div>
+              <div class="vb-now-text">
+                <div class="vb-now-title" id="jk-txt">Selecciona un episodio</div>
+                <div class="vb-now-sub" id="jk-cnt">—</div>
+              </div>
+            </div>
+            <div class="vb-controls">
+              <button class="vb-btn" id="jk-prev" title="Anterior">⏮</button>
+              <button class="vb-btn play" id="jk-play" title="Reproducir">▶</button>
+              <button class="vb-btn" id="jk-next" title="Siguiente">⏭</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="foot">
+    <span class="foot-logo">ATÓYATL</span>
+    <div class="foot-links">
+      <a href="javascript:void(0)" onclick="window.top.location.href='URL_PAGINA_ATO05'">ATO-05</a>
+      <a href="javascript:void(0)" onclick="window.top.location.href='URL_PAGINA_MICROCURSOS'">Micro Cursos</a>
+      <a href="javascript:void(0)" onclick="window.top.location.href='URL_PAGINA_EVA'">E.V.A.</a>
+    </div>
+    <p class="foot-copy">© 2026 ATÓYATL · DCSH · UAM Lerma · atoyatl_csh@correo.ler.uam.mx</p>
+  </footer>
+
+</div>
+
+<div id="reproductor-view">
+<button id="reproductor-back" title="Volver al sitio" style="position:fixed;top:14px;left:14px;z-index:600;background:rgba(14,79,110,0.85);color:#fff;border:none;border-radius:100px;padding:0.5rem 1.1rem;font-family:'DM Sans',sans-serif;font-size:0.75rem;letter-spacing:0.03em;cursor:pointer;backdrop-filter:blur(8px);box-shadow:0 4px 16px rgba(14,79,110,0.25);">← Volver al sitio</button>
+<div id="ytPlayerHost" style="position:fixed;width:2px;height:2px;top:0;left:0;opacity:0;pointer-events:none;overflow:hidden;z-index:-1;"></div>
+
+<canvas id="repro-water-bg"></canvas>
+<div class="player-shell">
+  <div class="ambient" id="ambient"></div>
+
+  <!-- SCENE: Album Cover + Vinyl -->
+  <div class="scene">
+
+    <!-- LEFT: Album Cover -->
+    <div class="album-side">
+      <div class="album-cover-wrap" id="albumWrap" title="Portada del álbum">
+        <div class="album-cover" id="albumCover">
+          <img id="coverArt" class="cover-art" src="" alt="Portada">
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Vinyl + Tonearm -->
+    <div class="vinyl-side">
+      <div class="disc-wrap" id="discWrap">
+        <div class="disc" id="disc">
+          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <!-- Vinyl grooves -->
+            <defs>
+              <!-- Gradiente radial oscuro: da profundidad al cristal sin volverlo gris -->
+              <radialGradient id="discGrad" cx="40%" cy="35%" r="70%">
+                <stop offset="0%"   stop-color="var(--disc-tint,#1a1a2e)" stop-opacity="0.72"/>
+                <stop offset="55%"  stop-color="var(--disc-tint,#1a1a2e)" stop-opacity="0.82"/>
+                <stop offset="100%" stop-color="var(--disc-tint,#0a0a18)" stop-opacity="0.92"/>
+              </radialGradient>
+              <!-- Gradiente para el brillo superior (capa de luz) -->
+              <radialGradient id="glassShine" cx="30%" cy="20%" r="60%">
+                <stop offset="0%"   stop-color="white" stop-opacity="0.22"/>
+                <stop offset="100%" stop-color="white" stop-opacity="0"/>
+              </radialGradient>
+              <clipPath id="discClip">
+                <circle cx="100" cy="100" r="100"/>
+              </clipPath>
+            </defs>
+            <!-- Capa base: gradiente oscuro con tinte de color -->
+            <circle cx="100" cy="100" r="100" fill="url(#discGrad)"/>
+            <!-- Surcos grabados -->
+            <circle cx="100" cy="100" r="97" fill="none" stroke="rgba(255,255,255,0.13)" stroke-width="1.2"/>
+            <circle cx="100" cy="100" r="92" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="0.8"/>
+            <circle cx="100" cy="100" r="87" fill="none" stroke="rgba(255,255,255,0.13)" stroke-width="0.8"/>
+            <circle cx="100" cy="100" r="82" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="0.7"/>
+            <circle cx="100" cy="100" r="77" fill="none" stroke="rgba(255,255,255,0.13)" stroke-width="0.7"/>
+            <circle cx="100" cy="100" r="72" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="0.6"/>
+            <circle cx="100" cy="100" r="67" fill="none" stroke="rgba(255,255,255,0.13)" stroke-width="0.6"/>
+            <circle cx="100" cy="100" r="62" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="0.5"/>
+            <!-- Banda interior -->
+            <circle cx="100" cy="100" r="57" fill="none" stroke="rgba(255,255,255,0.20)" stroke-width="3.5"/>
+            <!-- Capa de brillo (reflejo de luz como en vidrio real) -->
+            <circle cx="100" cy="100" r="100" fill="url(#glassShine)" clip-path="url(#discClip)"/>
+            <!-- Arco de luz superior izquierdo -->
+            <path d="M 18 68 A 88 88 0 0 1 68 18" stroke="rgba(255,255,255,0.40)" stroke-width="8" fill="none" stroke-linecap="round"/>
+            <!-- Arco de luz inferior derecho (reflejo secundario) -->
+            <path d="M 135 185 A 88 88 0 0 1 185 135" stroke="rgba(255,255,255,0.15)" stroke-width="5" fill="none" stroke-linecap="round"/>
+            <!-- Borde con brillo -->
+            <circle cx="100" cy="100" r="99" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
+            <circle cx="100" cy="100" r="98" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
+          </svg>
+          <!-- Centro del disco: imagen del álbum (sin textos) -->
+          <div class="disc-label" id="discLabel"></div>
+          <div class="disc-hole"></div>
+        </div>
+        <!-- Tonearm -->
+        <div class="arm-wrap" id="arm">
+          <svg viewBox="0 0 100 115" overflow="visible">
+            <defs><linearGradient id="ag" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#5bb8d4"/><stop offset="60%" style="stop-color:#1a7fa0"/><stop offset="100%" style="stop-color:#0e4f6e"/></linearGradient></defs>
+            <circle cx="82" cy="11" r="9" fill="#1a7fa0" stroke="#0e4f6e" stroke-width="1.5"/>
+            <circle cx="82" cy="11" r="4.5" fill="#5bb8d4"/>
+            <circle cx="82" cy="11" r="1.8" fill="#0e4f6e"/>
+            <path d="M 79 17 Q 62 48 24 90" stroke="url(#ag)" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+            <path d="M 21 87 L 9 98 L 14 104 L 27 93 Z" fill="#5bb8d4" stroke="#1a7fa0" stroke-width="0.8"/>
+            <line x1="10" y1="103" x2="8" y2="109" stroke="#1a7fa0" stroke-width="1.2"/>
+            <line x1="15" y1="105" x2="13" y2="111" stroke="#1a7fa0" stroke-width="1.2"/>
+          </svg>
+        </div>
+        <div class="scratch-hint">← arrastrar →</div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- MODAL DE LISTA DE CANCIONES -->
+  <div class="playlist-modal" id="playlistModal">
+    <div class="pm-head">
+      <span class="pm-label">Lista de canciones</span>
+      <button class="pm-close" id="btnCloseList" title="Cerrar">✕</button>
+    </div>
+    <div class="pm-body">
+      <div class="queue-list" id="queueList"></div>
+    </div>
+  </div>
+
+  <!-- BARRA DE CONTROLES FIJA EN LA PARTE INFERIOR -->
+  <div class="controls-bar">
+
+    <!-- Barra de progreso arriba de los controles -->
+    <div class="progress-area" style="padding:0;">
+      <div class="time-row"><span id="tCur">0:00</span><span id="tDur">0:00</span></div>
+      <div class="pbar" id="pbar"><div class="pfill" id="pfill"></div></div>
+    </div>
+
+    <!-- Fila principal de controles -->
+    <div class="controls-row">
+
+      <!-- Izquierda: info de la canción actual -->
+      <div class="ctrl-track-info">
+        <div class="ctrl-track-mini">
+          <span class="ctrl-title" id="ctrlTitle">Selecciona una canción</span>
+          <span class="ctrl-artist" id="ctrlArtist">ATÓYATL</span>
+        </div>
+      </div>
+
+      <!-- Centro: botones de reproducción -->
+      <div class="ctrl-center">
+        <button class="btn btn-sm" id="btnShuf" title="Aleatorio">⇄</button>
+        <button class="btn btn-sm" id="btnPrev" title="Anterior">⏮</button>
+        <button class="btn btn-play" id="btnPlay">▶</button>
+        <button class="btn btn-sm" id="btnNext" title="Siguiente">⏭</button>
+        <button class="btn btn-sm" id="btnRep" title="Repetir">↺</button>
+      </div>
+
+      <!-- Derecha: volumen + botón de lista -->
+      <div class="ctrl-right">
+        <div class="vol-row">
+          <span class="vol-ic">🔈</span>
+          <input type="range" class="vol" id="vol" min="0" max="1" step="0.01" value="0.8">
+          <span class="vol-ic">🔊</span>
+        </div>
+        <button class="btn-list" id="btnList">≡ Lista</button>
+      </div>
+
+    </div>
+  </div>
+
+
+<div class="scratch-flash" id="scratchFlash"></div>
+<audio id="aud" preload="metadata"></audio>
+
+<div class="album-overlay" id="albumOverlay"></div>
+<div class="album-opened" id="albumOpened">
+  <div class="album-opened-back">
+    <img class="back-img" id="backCoverArt" src="" alt="">
+    <div class="album-opened-lyrics">
+      <div class="album-opened-lyrics-title" id="lyricsTitle"></div>
+      <div class="album-opened-lyrics-artist" id="lyricsArtist"></div>
+      <div class="album-opened-lyrics-line"></div>
+      <div class="album-opened-lyrics-body" id="lyricsBody"></div>
+    </div>
+    <button class="album-opened-close" id="albumClose" title="Cerrar">✕</button>
+  </div>
+  <div class="album-opened-cover" id="albumOpenedCover">
+    <img id="openedCoverArt" src="" alt="">
+    <div class="cover-color" id="openedCoverColor"></div>
+  </div>
+</div>
+
+
+
+<!-- ══ PANEL DE CUSTOMIZACIÓN DEL DISCO ══════════════════════════ -->
+<div id="customPanel" class="custom-panel">
+  <div class="cp-header">
+    <span class="cp-title">🎨 Personalizar Disco</span>
+    <button class="cp-close" id="cpClose">✕</button>
+  </div>
+  <div class="cp-body">
+
+    <div class="cp-row">
+      <label class="cp-label">Tinte del disco</label>
+      <div class="cp-presets" id="tintPresets">
+        <button class="cp-swatch active" data-tint="#1a1a2e" style="background:#1a1a2e" title="Noche"></button>
+        <button class="cp-swatch" data-tint="#1a0a2e" style="background:#1a0a2e" title="Morado"></button>
+        <button class="cp-swatch" data-tint="#0a1a2e" style="background:#0a1a2e" title="Azul marino"></button>
+        <button class="cp-swatch" data-tint="#0a2e1a" style="background:#0a2e1a" title="Verde bosque"></button>
+        <button class="cp-swatch" data-tint="#2e0a0a" style="background:#2e0a0a" title="Rojo oscuro"></button>
+        <button class="cp-swatch" data-tint="#1a1a1a" style="background:#1a1a1a" title="Negro puro"></button>
+        <input type="color" class="cp-color-pick" id="tintCustom" value="#1a1a2e" title="Color personalizado">
+      </div>
+    </div>
+
+    <div class="cp-row">
+      <label class="cp-label">Transparencia</label>
+      <div class="cp-slider-wrap">
+        <input type="range" class="cp-slider" id="opacitySlider" min="30" max="95" value="82" step="1">
+        <span class="cp-val" id="opacityVal">82%</span>
+      </div>
+    </div>
+
+    <div class="cp-row">
+      <label class="cp-label">Brillo del reflejo</label>
+      <div class="cp-slider-wrap">
+        <input type="range" class="cp-slider" id="shineSlider" min="0" max="60" value="40" step="1">
+        <span class="cp-val" id="shineVal">40%</span>
+      </div>
+    </div>
+
+    <div class="cp-row">
+      <label class="cp-label">Visibilidad de surcos</label>
+      <div class="cp-slider-wrap">
+        <input type="range" class="cp-slider" id="grooveSlider" min="0" max="40" value="13" step="1">
+        <span class="cp-val" id="grooveVal">13%</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Botón flotante para abrir el panel -->
+<button class="cp-fab" id="cpFab" title="Personalizar disco">🎨</button>
+
+</div>
+
+<script>
+
+/* ── Water BG ── */
+(function(){
+  const canvas=document.getElementById('repro-water-bg');
+  const ctx=canvas.getContext('2d');
+  let W,H;
+  const waves=[
+    {y:0.35,amp:28,freq:0.008,speed:0.3,color:'rgba(91,184,212,0.25)'},
+    {y:0.55,amp:20,freq:0.012,speed:0.5,color:'rgba(26,127,160,0.18)'},
+    {y:0.72,amp:16,freq:0.006,speed:0.2,color:'rgba(184,228,240,0.3)'}
+  ];
+  let t=0;
+  function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    waves.forEach(w=>{
+      ctx.beginPath();ctx.moveTo(0,H*w.y);
+      for(let x=0;x<=W;x+=4){
+        const y=H*w.y+Math.sin(x*w.freq+t*w.speed)*w.amp+Math.sin(x*w.freq*0.5+t*w.speed*0.7)*w.amp*0.4;
+        ctx.lineTo(x,y);
+      }
+      ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.closePath();
+      ctx.fillStyle=w.color;ctx.fill();
+    });
+    t+=0.015;requestAnimationFrame(draw);
+  }
+  resize();window.addEventListener('resize',resize);draw();
+})();
+
+/* ── Tracks ── */
+const tracks=[
+  {n:1, title:'La sustancia',  artist:'Verzátil',     album:'Temporada 1',  dur:'3:58', yt:'https://www.youtube.com/watch?v=3XKDiq-UHVk&list=PLyOcezmdETXbNstmV9LNe1J1uH1DGsEeO', lc:'#1a7fa0', img:'sustancia.png',
+    backcover:'suscon.png', lyrics:``},
+
+  {n:2, title:'Triángulo Amoroso',           artist:'Verzátil',           album:'Temporada 1',               dur:'4:22', yt:'https://www.youtube.com/watch?v=3CnF0z0hXPM&list=PLyOcezmdETXbNstmV9LNe1J1uH1DGsEeO&index=2',       lc:'#0e4f6e', img:'triangulo.png',
+    backcover:'T.png', lyrics:``},
+
+  {n:3, title:'Diálogos socráticos',            artist:'Verzátil',  album:'Temporada 1',           dur:'3:44', yt:'https://www.youtube.com/watch?v=ECmbffRobr0&list=PLyOcezmdETXbNstmV9LNe1J1uH1DGsEeO&index=3',            lc:'#2c5066', img:'dialogo.png',
+    backcover:'contdi.png', lyrics:``},
+
+  {n:4, title:'La casa de los espíritus',          artist:'Verzátil',             album:'Temporada 1',            dur:'5:10', yt:'https://www.youtube.com/watch?v=3R5uEgWfzkg&list=PLyOcezmdETXbNstmV9LNe1J1uH1DGsEeO&index=4',          lc:'#5bb8d4', img:'espiritus.png',
+    backcover:'espiCon.png', lyrics:``},
+
+  {n:5, title:'La llorona',       artist:'Verzátil',album:'Temporada 1',    dur:'4:55', yt:'https://www.youtube.com/watch?v=NmEDZjuOzxY&list=PLyOcezmdETXbNstmV9LNe1J1uH1DGsEeO&index=5',       lc:'#1a7fa0', img:'llorona.png',
+    backcover:'contllo.png', lyrics:``},
+
+  {n:6, title:'Música Salsa',     artist:'Verzátil',    album:'Temporada 1',          dur:'3:30', yt:'https://www.youtube.com/watch?v=-M4gscvLWTQ&list=PLyOcezmdETXbNstmV9LNe1J1uH1DGsEeO&index=6',           lc:'#0e4f6e', img:'salsa.png',
+    backcover:'salcont.png', lyrics:``},
+
+  {n:7, title:'Arrullo de Estrellas',        artist:'Verzátil',     album:'Temporada 1',        dur:'6:15', yt:'https://www.youtube.com/watch?v=Ydkm5g-LTBs&list=PLyOcezmdETXbNstmV9LNe1J1uH1DGsEeO&index=7',              lc:'#2c5066', img:'arrullo.png',
+    backcover:'arrucont.png', lyrics:``},
+
+  {n:8, title:'El 68: Una Revolución Total',     artist:'Verzátil',  album:'Temporada 1',         dur:'4:08', yt:'https://www.youtube.com/watch?v=e4Eder5aBEA&list=PLyOcezmdETXbNstmV9LNe1J1uH1DGsEeO&index=8',                lc:'#1a7fa0', img:'cover.png',
+    backcover:'68.png', lyrics:``},
+
+  {n:9, title:'Sociedad del Cansancio',     artist:'Verzátil',  album:'Temporada 1',         dur:'4:08', yt:'https://www.youtube.com/watch?v=DDNGYwLuObQ&list=PLyOcezmdETXaa8jyWZHdTlfKetQtD-BFA',                lc:'#1a7fa0', img:'cover1.png',
+    backcover:'S.png', lyrics:``},
+
+  {n:10, title:'A call for Unity',     artist:'Verzátil',  album:'Temporada 1',         dur:'4:08', yt:'https://www.youtube.com/watch?v=-4uaQ0LZ1Ro',                lc:'#1a7fa0', img:'cover.png',
+    backcover:'68.png', lyrics:``},
+
+  {n:11, title:'Huéspedes noctorunos',     artist:'Verzátil',  album:'Temporada 1',         dur:'4:08', yt:'https://www.youtube.com/watch?v=7_cnBcU8EPQ',                lc:'#1a7fa0', img:'cover.png',
+    backcover:'68.png', lyrics:``},
+  
+  {n:12, title:'Ecos del Mictlán',     artist:'Verzátil',  album:'Temporada 1',         dur:'4:08', yt:'',                lc:'#1a7fa0', img:'cover.png',
+    backcover:'68.png', lyrics:``},
+];
+
+let cur=-1, playing=false, rep=false, shuf=false;
+const disc=document.getElementById('disc');
+const arm=document.getElementById('arm');
+const albumCover=document.getElementById('albumCover');
+const albumWrap=document.getElementById('albumWrap');
+const ambient=document.getElementById('ambient');
+const discLabel=document.getElementById('discLabel');
+
+/* -- YOUTUBE (audio-only): control wrapper + bootstrap -- */
+function extractYouTubeId(v){
+  if(!v) return '';
+  v = v.trim();
+  if(/^[A-Za-z0-9_-]{11}$/.test(v)) return v; // ya es un ID
+  const m = v.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : '';
+}
+const ytctl = {
+  ready:false, player:null, volume:0.8, pendingId:null, pendingPlay:false,
+  loadAndPlay(rawId){
+    const id = extractYouTubeId(rawId);
+    if(!id){ console.warn('Falta el link/ID de YouTube para este episodio'); return; }
+    if(!this.ready){ this.pendingId=id; this.pendingPlay=true; return; }
+    this.player.loadVideoById(id);
+    this.player.setVolume(this.volume*100);
+  },
+  play(){ if(this.ready) this.player.playVideo(); },
+  pause(){ if(this.ready) this.player.pauseVideo(); },
+  seekTo(t){ if(this.ready) this.player.seekTo(t, true); },
+  getCurrentTime(){ return this.ready ? (this.player.getCurrentTime()||0) : 0; },
+  getDuration(){ return this.ready ? (this.player.getDuration()||0) : 0; },
+  setVolume(v){ this.volume=v; if(this.ready) this.player.setVolume(v*100); }
+};
+window.onYouTubeIframeAPIReady = function(){
+  ytctl.player = new YT.Player('ytPlayerHost', {
+    height:'2', width:'2',
+    playerVars:{ autoplay:0, controls:0, disablekb:1, modestbranding:1, rel:0 },
+    events:{
+      onReady:function(){
+        ytctl.ready = true;
+        ytctl.player.setVolume(ytctl.volume*100);
+        if(ytctl.pendingId){ ytctl.loadAndPlay(ytctl.pendingId); ytctl.pendingId=null; }
+      },
+      onStateChange:onPlayerStateChange
+    }
+  });
+};
+function onPlayerStateChange(event){
+  if(event.data===YT.PlayerState.PLAYING){ setP(true); }
+  else if(event.data===YT.PlayerState.PAUSED){ setP(false); }
+  else if(event.data===YT.PlayerState.ENDED){
+    if(rep){ ytctl.seekTo(0); ytctl.play(); }
+    else{ const n=shuf?Math.floor(Math.random()*tracks.length):(cur<tracks.length-1?cur+1:-1); if(n>=0)select(n); else setP(false); }
+  }
+}
+
+function hexToRgb(h){
+  const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);
+  return `${r},${g},${b}`;
+}
+
+/* Album cover hover 3D tilt */
+let albumOpen=false;
+albumWrap.addEventListener('mousemove',e=>{
+  if(albumOpen) return;
+  const rect=albumWrap.getBoundingClientRect();
+  const cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
+  const dx=(e.clientX-cx)/(rect.width/2);
+  const dy=(e.clientY-cy)/(rect.height/2);
+  albumWrap.style.transform=`rotate(-4deg) rotateY(${dx*6}deg) rotateX(${-dy*5}deg) scale(1.04)`;
+});
+albumWrap.addEventListener('mouseleave',()=>{
+  if(albumOpen) return;
+  albumWrap.style.transform='';
+});
+
+/* ── Abrir / Cerrar álbum (overlay) ── */
+const albumOverlay=document.getElementById('albumOverlay');
+const albumOpened=document.getElementById('albumOpened');
+const openedCoverArt=document.getElementById('openedCoverArt');
+const openedCoverColor=document.getElementById('openedCoverColor');
+const lyricsTitle=document.getElementById('lyricsTitle');
+const lyricsArtist=document.getElementById('lyricsArtist');
+const lyricsBodyEl=document.getElementById('lyricsBody');
+const backCoverArt=document.getElementById('backCoverArt');
+
+function openAlbum(){
+  if(albumOpen||cur<0) return;
+  albumOpen=true;
+  const t=tracks[cur];
+  const coverSrc=document.getElementById('coverArt').src;
+  if(coverSrc && !coverSrc.endsWith('/')){
+    openedCoverArt.src=coverSrc;
+    openedCoverArt.style.display='block';
+    openedCoverColor.style.display='none';
+  } else {
+    openedCoverArt.style.display='none';
+    openedCoverColor.style.display='flex';
+    openedCoverColor.style.background=t.lc;
+  }
+  if(t.backcover) loadCover(backCoverArt, t.backcover);
+  else backCoverArt.src='';
+  lyricsTitle.textContent=t.title;
+  lyricsArtist.textContent=t.artist;
+  lyricsBodyEl.textContent=t.lyrics||'';
+  albumOverlay.classList.add('open');
+  albumOpened.classList.add('open');
+  /* Delay para que primero se vea y luego rote la tapa */
+  setTimeout(()=>{ albumOpened.classList.add('flip'); }, 50);
+}
+function closeAlbum(){
+  if(!albumOpen) return;
+  albumOpen=false;
+  albumOpened.classList.remove('open');
+  albumOpened.classList.remove('flip');
+  albumOverlay.classList.remove('open');
+}
+
+albumCover.addEventListener('click', e=>{
+  if(!albumOpen){ e.stopPropagation(); openAlbum(); }
+});
+document.getElementById('albumClose').addEventListener('click', e=>{
+  e.stopPropagation(); closeAlbum();
+});
+albumOverlay.addEventListener('click', closeAlbum);
+
+function loadBackCover(){}
+
+/* Intenta cargar la imagen; si falla, prueba extensiones alternativas */
+function loadCover(imgEl, src){
+  if(!src){ imgEl.src=''; return; }
+  /* Si es URL absoluta (http), no intentar cambiar extensión */
+  if(src.startsWith('http')){
+    imgEl.src=src;
+    return;
+  }
+  const alts=[src];
+  const dot=src.lastIndexOf('.');
+  if(dot>0){
+    const base=src.substring(0,dot);
+    const ext=src.substring(dot).toLowerCase();
+    ['.png','.jpg','.jpeg','.webp'].forEach(e=>{
+      if(e!==ext) alts.push(base+e);
+    });
+  }
+  let idx=0;
+  imgEl.onerror=function(){
+    idx++;
+    if(idx<alts.length){ imgEl.src=alts[idx]; }
+  };
+  imgEl.src=alts[0];
+}
+
+function select(i){
+  const t=tracks[i]; cur=i;
+  closeAlbum();
+  disc.classList.remove('spinning');
+  arm.classList.remove('down');
+
+  /* animate cover out */
+  albumWrap.style.transition='transform 0.3s ease, opacity 0.25s';
+  albumWrap.style.opacity='0';
+  albumWrap.style.transform='rotate(-4deg) scale(0.92)';
+
+  setTimeout(()=>{
+    /* Centro del disco: imagen del álbum */
+    discLabel.style.cssText += `background-image:url('${t.img}');background-size:111%;background-position:center;`;
+
+    /* Mini info en la barra inferior */
+    document.getElementById('ctrlTitle').textContent=t.title;
+    document.getElementById('ctrlArtist').textContent=t.artist;
+
+    /* Update album cover */
+    albumCover.style.background=t.lc;
+    loadCover(document.getElementById('coverArt'), t.img);
+
+    /* Ambient glow */
+    ambient.style.background=`radial-gradient(circle,rgba(${hexToRgb(t.lc)},0.22) 0%,transparent 70%)`;
+
+    /* Animate cover back in */
+    albumWrap.style.transition='transform 0.55s cubic-bezier(0.34,1.2,0.64,1), opacity 0.4s ease';
+    albumWrap.style.opacity='1';
+    albumWrap.style.transform='rotate(-4deg)';
+
+    buildQueue();
+    loadBackCover();
+    setTimeout(()=>{
+      ytctl.setVolume(+document.getElementById('vol').value);
+      ytctl.loadAndPlay(t.yt);
+      localStorage.setItem('mdv_index',i);
+    },520);
+  }, cur>=0 ? 220 : 0);
+}
+
+function setP(v){
+  playing=v;
+  document.getElementById('btnPlay').textContent=v?'⏸':'▶';
+  disc.classList.toggle('spinning',v);
+  arm.classList.toggle('down',v);
+  /* Subtle cover pulse when playing */
+  if(v){
+    albumWrap.style.filter='drop-shadow(0 0 18px rgba(91,184,212,0.35))';
+  } else {
+    albumWrap.style.filter='';
+  }
+}
+
+/* Lista completa en el modal (oculta por defecto) */
+function buildQueue(){
+  const el=document.getElementById('queueList');
+  el.innerHTML='';
+  for(let i=0;i<tracks.length;i++){
+    const t=tracks[i];
+    const r=document.createElement('div');
+    r.className='ml-row'+(i===cur?' active':'');
+    r.innerHTML=`<div class="ml-n">${t.n}</div><div class="ml-info"><div class="ml-title">${t.title}</div><div class="ml-sub">${t.artist}</div></div><div class="ml-dur">${t.dur}</div>`;
+    r.onclick=()=>{ select(i); closePlaylist(); };
+    el.appendChild(r);
+  }
+}
+buildQueue();
+
+/* Modal de lista */
+const playlistModal=document.getElementById('playlistModal');
+function openPlaylist(){ buildQueue(); playlistModal.classList.add('open'); document.getElementById('btnList').classList.add('open'); }
+function closePlaylist(){ playlistModal.classList.remove('open'); document.getElementById('btnList').classList.remove('open'); }
+document.getElementById('btnList').onclick=()=>{ playlistModal.classList.contains('open')?closePlaylist():openPlaylist(); };
+document.getElementById('btnCloseList').onclick=closePlaylist;
+/* Cerrar al hacer clic fuera */
+document.addEventListener('click',e=>{
+  if(playlistModal.classList.contains('open') && !playlistModal.contains(e.target) && e.target.id!=='btnList')closePlaylist();
+});
+
+/* Controls */
+document.getElementById('btnPlay').onclick=()=>{
+  if(cur<0){select(0);return;}
+  if(playing){ytctl.pause();}
+  else{ytctl.play();}
+};
+document.getElementById('btnPrev').onclick=()=>{if(cur>0)select(cur-1);};
+document.getElementById('btnNext').onclick=()=>{select(shuf?Math.floor(Math.random()*tracks.length):(cur<tracks.length-1?cur+1:0));};
+document.getElementById('btnRep').onclick=function(){rep=!rep;this.classList.toggle('hi',rep);};
+document.getElementById('btnShuf').onclick=function(){shuf=!shuf;this.classList.toggle('hi',shuf);};
+
+/* Progress */
+function syncTime(){
+  const dur=ytctl.getDuration();
+  if(!dur)return;
+  const p=ytctl.getCurrentTime()/dur;
+  document.getElementById('pfill').style.width=(p*100)+'%';
+  document.getElementById('tCur').textContent=fmt(ytctl.getCurrentTime());
+  document.getElementById('tDur').textContent=fmt(dur);
+}
+setInterval(syncTime,400);
+document.getElementById('pbar').onclick=e=>{
+  const r=e.currentTarget.getBoundingClientRect();
+  const dur=ytctl.getDuration();
+  if(dur)ytctl.seekTo(((e.clientX-r.left)/r.width)*dur);
+};
+document.getElementById('vol').oninput=e=>{ytctl.setVolume(+e.target.value);};
+function fmt(s){const m=Math.floor(s/60),sec=Math.floor(s%60);return `${m}:${sec<10?'0':''}${sec}`;}
+
+/* ── TURNTABLE SCRATCH INTERACTION ── */
+(function(){
+  const discEl=document.getElementById('disc');
+  const scratchFlash=document.getElementById('scratchFlash');
+  let dragging=false, startX=0, startTime=0, spinAngle=0, animId=null;
+  const SCRATCH_THRESHOLD=40;
+  const SCRATCH_TIMEOUT=500;
+
+  function flashLabel(text){
+    scratchFlash.textContent=text;
+    scratchFlash.style.opacity='1';
+    clearTimeout(scratchFlash._t);
+    scratchFlash._t=setTimeout(()=>{scratchFlash.style.opacity='0';},600);
+  }
+
+  function stopSpin(){
+    if(animId){cancelAnimationFrame(animId);animId=null;}
+  }
+
+  function applyTempSpin(direction){
+    let angle=spinAngle, vel=direction*18;
+    stopSpin();
+    disc.classList.remove('spinning');
+    function step(){
+      vel*=0.88;
+      angle+=vel;
+      discEl.style.transform=`rotate(${angle}deg)`;
+      if(Math.abs(vel)>0.5){animId=requestAnimationFrame(step);}
+      else{
+        animId=null;
+        discEl.style.transform='';
+        if(playing)disc.classList.add('spinning');
+      }
+    }
+    animId=requestAnimationFrame(step);
+  }
+
+  discEl.addEventListener('mousedown',e=>{
+    dragging=true;startX=e.clientX;startTime=Date.now();
+    disc.classList.remove('spinning');
+    if(playing)ytctl.pause();
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove',e=>{
+    if(!dragging)return;
+    const dx=e.clientX-startX;
+    discEl.style.transform=`rotate(${dx*0.6}deg)`;
+  });
+  document.addEventListener('mouseup',e=>{
+    if(!dragging)return;
+    dragging=false;
+    const dx=e.clientX-startX;
+    const dt=Date.now()-startTime;
+    discEl.style.transform='';
+    if(Math.abs(dx)>SCRATCH_THRESHOLD && dt<SCRATCH_TIMEOUT){
+      if(dx<0){
+        if(ytctl.getDuration() && ytctl.getCurrentTime()>5){
+          ytctl.seekTo(Math.max(0,ytctl.getCurrentTime()-15));
+          flashLabel('◀◀ −15s');
+          applyTempSpin(-1);
+        } else if(cur>0){
+          select(cur-1);
+          flashLabel('◀ Anterior');
+        }
+      } else {
+        if(ytctl.getDuration() && ytctl.getCurrentTime()<ytctl.getDuration()-5){
+          ytctl.seekTo(Math.min(ytctl.getDuration(),ytctl.getCurrentTime()+15));
+          flashLabel('▶▶ +15s');
+          applyTempSpin(1);
+        } else {
+          select(cur<tracks.length-1?cur+1:0);
+          flashLabel('Siguiente ▶');
+        }
+      }
+    } else {
+      if(playing){setP(false);}
+      else if(cur>=0){ytctl.play();}
+      else{select(0);}
+    }
+    if(playing && !dragging){
+      ytctl.play();
+    }
+  });
+
+  /* Touch support */
+  discEl.addEventListener('touchstart',e=>{
+    dragging=true;startX=e.touches[0].clientX;startTime=Date.now();
+    disc.classList.remove('spinning');
+    if(playing)ytctl.pause();
+  },{passive:true});
+  document.addEventListener('touchmove',e=>{
+    if(!dragging)return;
+    const dx=e.touches[0].clientX-startX;
+    discEl.style.transform=`rotate(${dx*0.6}deg)`;
+  },{passive:true});
+  document.addEventListener('touchend',e=>{
+    if(!dragging)return;
+    dragging=false;
+    const dx=e.changedTouches[0].clientX-startX;
+    const dt=Date.now()-startTime;
+    discEl.style.transform='';
+    if(Math.abs(dx)>SCRATCH_THRESHOLD && dt<SCRATCH_TIMEOUT){
+      if(dx<0){
+        if(ytctl.getDuration() && ytctl.getCurrentTime()>5){ytctl.seekTo(Math.max(0,ytctl.getCurrentTime()-15));flashLabel('◀◀ −15s');applyTempSpin(-1);}
+        else if(cur>0){select(cur-1);flashLabel('◀ Anterior');}
+      } else {
+        if(ytctl.getDuration() && ytctl.getCurrentTime()<ytctl.getDuration()-5){ytctl.seekTo(Math.min(ytctl.getDuration(),ytctl.getCurrentTime()+15));flashLabel('▶▶ +15s');applyTempSpin(1);}
+        else{select(cur<tracks.length-1?cur+1:0);flashLabel('Siguiente ▶');}
+      }
+    } else {
+      if(playing){setP(false);}
+      else if(cur>=0){ytctl.play();}
+      else{select(0);}
+    }
+    if(playing && !dragging){ytctl.play();}
+  });
+})();
+
+/* ── Restore last track ── */
+const si=parseInt(localStorage.getItem('mdv_index'));
+if(!isNaN(si)&&tracks[si]){
+  const t=tracks[si];cur=si;
+  document.getElementById('ctrlTitle').textContent=t.title;
+  document.getElementById('ctrlArtist').textContent=t.artist;
+  discLabel.style.background=t.lc;
+  discLabel.style.cssText+=`background-image:url('${t.img}');background-size:111%;background-position:center;`;
+  albumCover.style.background=t.lc;
+  loadCover(document.getElementById('coverArt'), t.img);
+  ambient.style.background=`radial-gradient(circle,rgba(${hexToRgb(t.lc)},0.22) 0%,transparent 70%)`;
+  buildQueue();
+  loadBackCover();
+}
+
+</script>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+
+<script>
+/* -- MOSTRAR/OCULTAR EL REPRODUCTOR (unica logica agregada) -- */
+(function(){
+  const mainView = document.getElementById('main-view');
+  const reproView = document.getElementById('reproductor-view');
+
+  window.openReproductor = function(i){
+    mainView.style.display = 'none';
+    document.documentElement.style.fontSize = '15px';
+    reproView.classList.add('visible');
+    if (typeof i === 'number' && typeof select === 'function') select(i);
+  };
+  window.closeReproductor = function(){
+    reproView.classList.remove('visible');
+    document.documentElement.style.fontSize = '';
+    mainView.style.display = '';
+    if (typeof ytctl !== 'undefined') ytctl.pause();
+  };
+
+  document.getElementById('reproductor-back').onclick = closeReproductor;
+})();
+</script>
+
+<script>
+
+/* ── CUSTOMIZACIÓN DEL DISCO ── */
+(function(){
+  const fab       = document.getElementById('cpFab');
+  const panel     = document.getElementById('customPanel');
+  const cpClose   = document.getElementById('cpClose');
+  const opSlider  = document.getElementById('opacitySlider');
+  const opVal     = document.getElementById('opacityVal');
+  const shSlider  = document.getElementById('shineSlider');
+  const shVal     = document.getElementById('shineVal');
+  const grSlider  = document.getElementById('grooveSlider');
+  const grVal     = document.getElementById('grooveVal');
+  const tintCustom= document.getElementById('tintCustom');
+  const discSvg   = document.querySelector('#disc svg');
+
+  let currentTint = '#1a1a2e';
+
+  fab.addEventListener('click', ()=> panel.classList.toggle('open'));
+  cpClose.addEventListener('click', ()=> panel.classList.remove('open'));
+  document.addEventListener('click', e=>{
+    if(!panel.contains(e.target) && e.target!==fab) panel.classList.remove('open');
+  });
+
+  function applyDisc(){
+    const op      = opSlider.value / 100;
+    const shine   = shSlider.value / 100;
+    const groove  = grSlider.value / 100;
+    const t       = currentTint;
+
+    // Actualizar CSS variable para el tinte
+    discSvg.querySelector('#discGrad stop:nth-child(1)').setAttribute('stop-color', t);
+    discSvg.querySelector('#discGrad stop:nth-child(1)').setAttribute('stop-opacity', (op * 0.78).toFixed(2));
+    discSvg.querySelector('#discGrad stop:nth-child(2)').setAttribute('stop-color', t);
+    discSvg.querySelector('#discGrad stop:nth-child(2)').setAttribute('stop-opacity', (op * 0.88).toFixed(2));
+    discSvg.querySelector('#discGrad stop:nth-child(3)').setAttribute('stop-color', darken(t));
+    discSvg.querySelector('#discGrad stop:nth-child(3)').setAttribute('stop-opacity', (op).toFixed(2));
+
+    // Brillo
+    discSvg.querySelector('#glassShine stop:nth-child(1)').setAttribute('stop-opacity', (shine * 0.9).toFixed(2));
+
+    // Arcos de luz
+    const paths = discSvg.querySelectorAll('path[stroke]');
+    if(paths[0]) paths[0].setAttribute('stroke', `rgba(255,255,255,${(shine).toFixed(2)})`);
+    if(paths[1]) paths[1].setAttribute('stroke', `rgba(255,255,255,${(shine*0.38).toFixed(2)})`);
+
+    // Surcos
+    discSvg.querySelectorAll('circle[stroke]').forEach((c,i)=>{
+      const r = parseFloat(c.getAttribute('r'));
+      if(r < 98 && r > 56){
+        const baseOp = i%2===0 ? groove : groove*0.55;
+        c.setAttribute('stroke', `rgba(255,255,255,${baseOp.toFixed(2)})`);
+      }
+    });
+  }
+
+  function darken(hex){
+    const r=Math.max(0,parseInt(hex.slice(1,3),16)-8);
+    const g=Math.max(0,parseInt(hex.slice(3,5),16)-8);
+    const b=Math.max(0,parseInt(hex.slice(5,7),16)-8);
+    return `rgb(${r},${g},${b})`;
+  }
+
+  // Tints presets
+  document.getElementById('tintPresets').addEventListener('click', e=>{
+    const sw = e.target.closest('.cp-swatch');
+    if(!sw) return;
+    document.querySelectorAll('.cp-swatch').forEach(s=>s.classList.remove('active'));
+    sw.classList.add('active');
+    currentTint = sw.dataset.tint;
+    tintCustom.value = currentTint;
+    applyDisc();
+  });
+  tintCustom.addEventListener('input', e=>{
+    currentTint = e.target.value;
+    document.querySelectorAll('.cp-swatch').forEach(s=>s.classList.remove('active'));
+    applyDisc();
+  });
+
+  opSlider.addEventListener('input', ()=>{ opVal.textContent=opSlider.value+'%'; applyDisc(); });
+  shSlider.addEventListener('input', ()=>{ shVal.textContent=shSlider.value+'%'; applyDisc(); });
+  grSlider.addEventListener('input', ()=>{ grVal.textContent=grSlider.value+'%'; applyDisc(); });
+})();
+
+</script>
+
+<script>
+/* ── WATER CANVAS ── */
+(function(){
+  const c = document.getElementById('water-bg');
+  const ctx = c.getContext('2d');
+  let W, H;
+  const waves = [
+    { y:0.35, amp:26, freq:0.008, spd:0.28, col:'rgba(91,184,212,0.28)' },
+    { y:0.58, amp:18, freq:0.011, spd:0.45, col:'rgba(26,127,160,0.2)'  },
+    { y:0.75, amp:14, freq:0.006, spd:0.18, col:'rgba(184,228,240,0.32)'},
+  ];
+  let t = 0;
+  function resize(){ W=c.width=window.innerWidth; H=c.height=window.innerHeight; }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    waves.forEach(w=>{
+      ctx.beginPath(); ctx.moveTo(0,H*w.y);
+      for(let x=0;x<=W;x+=4){
+        const y=H*w.y+Math.sin(x*w.freq+t*w.spd)*w.amp+Math.sin(x*w.freq*0.5+t*w.spd*0.6)*w.amp*0.35;
+        ctx.lineTo(x,y);
+      }
+      ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.closePath();
+      ctx.fillStyle=w.col; ctx.fill();
+    });
+    t+=0.014; requestAnimationFrame(draw);
+  }
+  resize(); window.addEventListener('resize',resize); draw();
+})();
+
+/* ── SCROLL REVEAL ── */
+(function(){
+  const obs = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); obs.unobserve(e.target); } });
+  },{threshold:0.08});
+  document.querySelectorAll('.rv').forEach(el=>obs.observe(el));
+})();
+
+/* ── NAV SHADOW ── */
+window.addEventListener('scroll',()=>{
+  const navEl = document.querySelector('nav'); if(navEl) navEl.style.boxShadow = window.scrollY>40 ? '0 4px 24px rgba(14,79,110,0.08)' : 'none';
+});
+
+/* ── ROCOLA ── */
+(function(){
+  const eps = [
+    {id:'T1E01',t:'La Sustancia',          s:'T1 · E01',season:1,lc:'#1a4a7a',url:'https://sites.google.com/view/atoyatl/verzátil/temporada-1/la-sustancia'},
+    {id:'T1E02',t:'El Triángulo Amoroso',  s:'T1 · E02',season:1,lc:'#0d2a1a',url:'https://sites.google.com/view/atoyatl/verzátil/temporada-1/el-triangulo-amoroso'},
+    {id:'T1E03',t:'Diálogos Socráticos',   s:'T1 · E04',season:1,lc:'#2a1a08',url:'https://sites.google.com/view/atoyatl/verzátil/temporada-1/diálogos-socráticos'},
+    {id:'T1E04',t:'La Casa de los Espíritus',s:'T1 · E05',season:1,lc:'#1a3a1a',url:'https://sites.google.com/view/atoyatl/verzátil/temporada-1/la-casa-de-los-espíritus'},
+    {id:'T1E05',t:'Detrás de la Leyenda: La llorona',  s:'T1 · E06',season:1,lc:'#3a1a00',url:'https://sites.google.com/view/atoyatl/verzátil/temporada-1/detrás-de-la-leyenda'},
+    {id:'T1E06',t:'La Música Salsa',        s:'T1 · E07',season:1,lc:'#1a1a3a',url:'https://sites.google.com/view/atoyatl/verzátil/temporada-1/la-música-salsa'},
+    {id:'T1E07',t:'Una Oda al Amor Eterno',s:'T1 · E08',season:1,lc:'#0a1a0a',url:'https://sites.google.com/view/atoyatl/verzátil/temporada-1/una-oda-al-amor-eterno'},
+    {id:'T1E08',t:'El 68',                 s:'T1 · E09',season:1,lc:'#2a0a0a',url:'https://sites.google.com/view/atoyatl/verzátil/temporada-1/el-68'},
+   
+    
+    {id:'T2E01',t:'Sociedad del Cansancio',s:'T2 · E01',season:2,lc:'#0e4f6e',url:'https://sites.google.com/view/atoyatl/verzátil/temporada-2/sociedad-del-cansancio'},
+    {id:'T2E02',t:'A Call for Unity',      s:'T2 · E02',season:2,lc:'#1a7fa0',url:'https://sites.google.com/view/atoyatl/verzátil/temporada-2/a-call-for-unity'},
+    {id:'T2E03',t:'Huéspedes Nocturnos',   s:'T2 · E03',season:2,lc:'#1a1a3a',url:'https://sites.google.com/view/atoyatl/verzátil/temporada-2/huéspedes-nocturnos'},
+    {id:'T2E04',t:'Ecos del Mictlán',      s:'T2 · E04',season:2,lc:'#3a1a00',url:'https://sites.google.com/view/atoyatl/verzátil/temporada-2/ecos-del-mictlán'},
+  ];
+
+  let cur = -1;
+  let activeSeason = 'all';
+
+  // season tabs
+  const seasonsWrap = document.getElementById('jk-seasons');
+  const seasons = [
+    {key:'all', label:'Todas'},
+    {key:1, label:'Temporada 1'},
+    {key:2, label:'Temporada 2'},
+  ];
+  seasons.forEach(sObj => {
+    const b = document.createElement('button');
+    b.className = 'vb-season-btn' + (sObj.key===activeSeason ? ' active' : '');
+    b.textContent = sObj.label;
+    b.onclick = () => {
+      activeSeason = sObj.key;
+      document.querySelectorAll('.vb-season-btn').forEach(btn => btn.classList.remove('active'));
+      b.classList.add('active');
+      applyFilter();
+    };
+    seasonsWrap.appendChild(b);
+  });
+
+  function getFiltered() {
+    const q = document.getElementById('jk-search').value.toLowerCase();
+    return eps.filter(e =>
+      (activeSeason === 'all' || e.season === activeSeason) &&
+      (e.t.toLowerCase().includes(q) || e.s.toLowerCase().includes(q))
+    );
+  }
+
+  function applyFilter() { buildShelf(getFiltered()); }
+
+  function buildShelf(list) {
+    const shelf = document.getElementById('jk-shelf');
+    shelf.innerHTML = '';
+    list.forEach(e => {
+      const i = eps.indexOf(e);
+      const row = document.createElement('div');
+      row.className = 'vb-row' + (i===cur?' active':'');
+      row.innerHTML = `<div class="vb-num"><span class="n">${i+1}</span><span class="p">▶</span></div><div class="vb-disc"><div class="vb-disc-label" style="background:${e.lc}"></div><div class="vb-disc-hole"></div></div><div class="vb-info"><div class="vb-title">${e.t}</div><div class="vb-sub">${e.s}</div></div><div class="vb-id">${e.id}</div>`;
+      row.onclick = () => pick(i);
+      shelf.appendChild(row);
+    });
+  }
+  buildShelf(eps);
+
+  function pick(i) {
+    cur = i;
+    const e = eps[i];
+    document.getElementById('jk-txt').textContent = e.t;
+    document.getElementById('jk-cnt').textContent = e.s + ' · ' + e.id;
+    document.getElementById('jk-now-label').style.background = e.lc;
+    document.getElementById('jk-now-disc').classList.add('spin');
+    applyFilter();
+    openReproductor(i);
+  }
+
+  document.getElementById('jk-prev').onclick = () => { if(cur>0) pick(cur-1); };
+  document.getElementById('jk-next').onclick = () => { if(cur<eps.length-1) pick(cur+1); };
+  document.getElementById('jk-play').onclick = () => { if(cur<0) pick(0); else pick(cur); };
+
+  document.getElementById('jk-search').addEventListener('input', applyFilter);
+})();
+
+</script>
+</body>
+</html>
